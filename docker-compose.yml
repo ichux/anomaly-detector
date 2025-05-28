@@ -1,0 +1,62 @@
+name: anode
+
+x-the-logging: &the-logging
+  driver: "json-file"
+  options:
+    max-file: 5
+    max-size: 10m
+
+services:
+  if_anomaly_detector_db:
+    image: typesense/typesense:28.0
+    restart: always
+    container_name: cf_anomaly_detector_db
+    command: "--data-dir /data --api-key=${TYPESENSE_API} --enable-cors"
+    volumes:
+      - /opt/anomaly_detector/typesense_db:/data
+    env_file:
+      - .env
+    logging: *the-logging
+
+  if_anomaly_detector_manager: &if_anomaly_detector_manager
+    build:
+      context: containers
+      dockerfile: Dockerfile
+    container_name: cf_anomaly_detector_manager
+    restart: always
+    command:
+      - /bin/bash
+      - -c
+      - |
+        ./booter.sh && python3 -m processor.runner
+    tty: true
+    volumes:
+      - ./containers/app:/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - .env
+    logging: *the-logging
+
+  if_anomaly_detector_web:
+    <<: *if_anomaly_detector_manager
+    restart: always
+    container_name: cf_anomaly_detector_web
+    command:
+      - /bin/bash
+      - -c
+      - |
+        ./booter.sh && uvicorn web.main:app --host 0.0.0.0 --port 80 --reload
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT}:80"
+    logging: *the-logging
+
+  if_anomaly_detector_events:
+    <<: *if_anomaly_detector_manager
+    restart: always
+    container_name: cf_anomaly_detector_events
+    command: ./system_events/boot.sh
+    env_file:
+      - .env
