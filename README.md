@@ -12,11 +12,11 @@ The **Anomaly Detector** is a fully offline, self-hosted AI solution for ingesti
     - Internet access (To pull needed images, and AI model - approximately 6.6GB)
 - Start the program:
     - `make e` - create the .env file
-    - `make b` - build the
+    - `make b` - build the container
 
 ### Key Benefits
 
-* **Privacy & Security:** All processing and storage occur on-premises via Ollama and Typesense.
+* **Privacy & Security:** All processing and storage occur on-premise via Ollama and Typesense.
 * **Speed & Scalability:** Millisecond-level indexing and retrieval with Typesense; sub-second inference using Llama 3.2 via Ollama.
 * **Clarity:** Technical anomalies are transformed into clear narratives, reducing operator cognitive load.
 
@@ -251,38 +251,36 @@ Setting the temperature to **0.1** is optimal for factual summarization:
 
 ## Additional Sections
 
-1. **Setup Instructions**
-   *(To be added: Steps for installing dependencies, configuring `.env`, initializing services.)*
-
-2. **Detection Thresholds**
+1. **Detection Thresholds**
 
    * **Static:** Fixed limits (e.g., pressure > 4.0).
    * **Dynamic:** Statistical baselines (e.g., percentiles, rolling averages).
    * **Hybrid Rules:** Compositional logic (e.g., "dropout after spike").
 
-3. **LangChain Integration**
+2. **LangChain Integration**
 
    * Retrieval → Prompt → LLM → Post-processing
    * Extendable via custom logic (e.g., severity ranking, multilingual output)
 
-4. **API Reference**
+3. **API Reference**
 
    * Parameters, status codes, error schema
    * Pagination: `page`, `per_page`, filtering by `sensor_id`, `anomaly_type`
 
-5. **Local Deployment Guide**:
+4. **Local Deployment Guide**:
     - Run  `make e` to generate all environment variables
     - Run  `make b`
 
-6. **Observability & Security**
+5. **Observability & Security**
 
    * All diagnostics via structured logs
    * No external alerts; rely on logs and exception traces
    * Isolate services using Docker networks
-   * Store data indefinitely for auditability
+   * Store data indefinitely for audits
 
 ---
 
 ## Final Remarks
 
-The Anomaly Detector emphasizes secure, scalable, and intelligible log monitoring. Its offline-first architecture and efficient orchestration make it suitable for real-time operations in privacy-conscious environments. For contributions, configuration examples, and further support, visit the project’s GitHub repository.
+The Anomaly Detector emphasizes secure, scalable, and intelligible log monitoring. Its offline-first architecture and efficient orchestration make it suitable for real-time operations in privacy-conscious environments.
+
