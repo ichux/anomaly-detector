@@ -29,7 +29,6 @@ services:
       - -c
       - |
         ./booter.sh && python3 -m processor.runner
-    tty: true
     volumes:
       - ./containers/app:/app
     extra_hosts:

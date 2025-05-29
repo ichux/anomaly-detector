@@ -10,14 +10,14 @@ logger = logging.getLogger("summarizer.py")
 
 
 def generate_anomaly_summary(
-    anomalies: List[Dict], model_name: str = "llama3.2:3b-instruct-fp16"
+    anomalies: List[Dict], model_name: str = "llama3.2:3b-instruct-q8_0"
 ) -> str:
     """
     Generate a detailed human-readable anomaly summary via Ollama.
 
     Args:
         anomalies: List of anomaly records (each a dict).
-        model_name: Ollama model identifier (default: llama3.2:3b-instruct-fp16).
+        model_name: Ollama model identifier (default: llama3.2:3b-instruct-q8_0).
 
     Returns:
         A multi-sentence, structured summary describing the anomalies.
