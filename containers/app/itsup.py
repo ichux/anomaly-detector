@@ -12,7 +12,7 @@ logging.basicConfig(
 )
 
 
-def wait_for_port(host: str, port: int):
+def wait_for_port(host: str, port: int) -> None:
     while True:
         try:
             with socket.create_connection((host, port), timeout=1):
@@ -23,11 +23,11 @@ def wait_for_port(host: str, port: int):
             time.sleep(1)
 
 
-def wait_for_route(url: str, interval: int = 1, timeout: int = 2):
+def wait_for_route(url: str, interval: int = 1, timeout: int = 2) -> None:
     parsed = urlparse(url)
-    host = parsed.hostname
-    port = parsed.port or (443 if parsed.scheme == "https" else 80)
-    path = parsed.path or "/"
+    host: str = parsed.hostname  # type: ignore
+    port: int = parsed.port or (443 if parsed.scheme == "https" else 80)
+    path: str = parsed.path or "/"
 
     conn_class = (
         http.client.HTTPSConnection
@@ -50,13 +50,13 @@ def wait_for_route(url: str, interval: int = 1, timeout: int = 2):
         time.sleep(interval)
 
 
-def wait_for_model(url: str, interval: int = 1, timeout: int = 30):
-    target_name = os.getenv("OLLAMA_MODEL")
+def wait_for_model(url: str, interval: int = 1, timeout: int = 30) -> None:
+    target_name: str = os.getenv("OLLAMA_MODEL")  # type: ignore
 
     parsed = urlparse(url)
-    host = parsed.hostname
-    port = parsed.port or (443 if parsed.scheme == "https" else 80)
-    path = parsed.path or ""
+    host: str = parsed.hostname  # type: ignore
+    port: int = parsed.port or (443 if parsed.scheme == "https" else 80)
+    path: str = parsed.path or ""
 
     conn_class = (
         http.client.HTTPSConnection
@@ -64,7 +64,7 @@ def wait_for_model(url: str, interval: int = 1, timeout: int = 30):
         else http.client.HTTPConnection
     )
 
-    start_time = time.time()
+    start_time: float = time.time()
 
     while True:
         try:
@@ -75,8 +75,8 @@ def wait_for_model(url: str, interval: int = 1, timeout: int = 30):
 
             if response.status == 200:
                 try:
-                    models = json.loads(data).get("models")
-                    if any(m.get("name") == target_name for m in models):
+                    models = json.loads(data).get("models")  # type: ignore
+                    if any(m.get("name") == target_name for m in models):  # type: ignore
                         logging.info(f"✅ Model '{target_name}' exists")
                         break
                     else:
@@ -90,7 +90,7 @@ def wait_for_model(url: str, interval: int = 1, timeout: int = 30):
         except (ConnectionRefusedError, http.client.HTTPException, OSError) as e:
             logging.info(f"⏳ Waiting for {url}... ({type(e).__name__})")
 
-        if timeout is not None and (time.time() - start_time) > timeout:
+        if timeout is not None and (time.time() - start_time) > timeout:  # type: ignore
             raise TimeoutError(
                 f"❌ Timed out waiting for model '{target_name}' at {url}"
             )

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 
 
 class SystemEventTracker:
-    def __init__(self):
+    def __init__(self) -> None:
         self.last_event_times: Dict[str, Optional[datetime]] = {}
         self.drift_start_times: Dict[str, Optional[datetime]] = {}
 
@@ -12,20 +12,20 @@ class SystemEventTracker:
         self, event: Dict[str, Any]
     ) -> Dict[str, Union[List[Dict[str, Any]], bool]]:
         anomalies: List[Dict[str, Any]] = []
-        sensor_id = event.get("sensor_id")
+        sensor_id: str = event.get("sensor_id")  # type: ignore
 
         try:
-            curr_time = datetime.fromisoformat(
-                event["timestamp"].replace("Z", "+00:00")
+            curr_time: datetime = datetime.fromisoformat(
+                event["timestamp"].replace("Z", "+00:00")  # type: ignore
             )
         except Exception as e:
             logging.error(f"Invalid timestamp {event.get('timestamp')}: {e}")
             return {"anomalies": [], "is_anomaly": False}
 
         # Dropout detection
-        last_time = self.last_event_times.get(sensor_id)
+        last_time: Optional[datetime] = self.last_event_times.get(sensor_id)
         if last_time:
-            delta = (curr_time - last_time).total_seconds()
+            delta: float = (curr_time - last_time).total_seconds()
             if delta > 10:
                 anomalies.append(
                     {
@@ -43,8 +43,8 @@ class SystemEventTracker:
         self.last_event_times[sensor_id] = curr_time
 
         # Spike detection
-        pressure = event.get("pressure", 0.0)
-        flow = event.get("flow", 0.0)
+        pressure: float = event.get("pressure", 0.0)  # type: ignore
+        flow: float = event.get("flow", 0.0)  # type: ignore
         if pressure > 4.0:
             anomalies.append(
                 {
@@ -69,13 +69,13 @@ class SystemEventTracker:
             )
 
         # Drift detection
-        temp = event.get("temperature", 0.0)
-        drift_start = self.drift_start_times.get(sensor_id)
+        temp: float = event.get("temperature", 0.0)  # type: ignore
+        drift_start: Optional[datetime] = self.drift_start_times.get(sensor_id)
         if temp > 38.0:
             if drift_start is None:
                 self.drift_start_times[sensor_id] = curr_time
             else:
-                duration = (curr_time - drift_start).total_seconds()
+                duration: float = (curr_time - drift_start).total_seconds()
                 if duration > 15:
                     anomalies.append(
                         {

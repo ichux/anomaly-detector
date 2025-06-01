@@ -9,7 +9,7 @@ from typing import Dict, Union
 
 logger = logging.getLogger("runner.py")
 
-ENDPOINT_URL: str = f"{os.getenv('APP_INTERNAL_HOST')}:80"
+ENDPOINT_URL: str = f"{os.getenv('APP_INTERNAL_HOST')}:80"  # type: ignore
 ENDPOINT_PATH: str = "/system_event"
 STAGES = ["normal", "spike", "drift", "dropout"]
 WEIGHTS = [0.6, 0.12, 0.09, 0.04]
@@ -51,7 +51,7 @@ def simulate_dropout() -> None:
 def send_data(data: Dict[str, Union[str, float]]) -> None:
     # logger.info(f"\n{data}\n")
     try:
-        conn: http.client.HTTPConnection = http.client.HTTPConnection(ENDPOINT_URL)
+        conn: http.client.HTTPConnection = http.client.HTTPConnection(ENDPOINT_URL)  # type: ignore
         headers: Dict[str, str] = {"Content-Type": "application/json"}
         conn.request("POST", ENDPOINT_PATH, json.dumps(data), headers)
         conn.close()
@@ -61,9 +61,6 @@ def send_data(data: Dict[str, Union[str, float]]) -> None:
 
 def main() -> None:
     while True:
-        # Fixed to match assignment specification
-        # sensor_id: str = "wtf-pipe-1"
-
         sensor_id: str = f"wtf-pipe-{random.randint(1, 10)}"
         anomaly_type: str = random.choices(STAGES, weights=WEIGHTS, k=1)[0]
 
