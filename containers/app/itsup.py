@@ -51,7 +51,7 @@ def wait_for_route(url: str, interval: int = 1, timeout: int = 2):
 
 
 def wait_for_model(url: str, interval: int = 1, timeout: int = 30):
-    target_name = "llama3.2:3b-instruct-fp16"
+    target_name = os.getenv("OLLAMA_MODEL")
 
     parsed = urlparse(url)
     host = parsed.hostname

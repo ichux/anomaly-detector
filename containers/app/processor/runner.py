@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -16,13 +17,42 @@ anomaly_summary_store = AnomalySummary()
 logger = logging.getLogger("runner.py")
 
 
+def group_anomalies(intake):
+    grouped = {"timestamp": None, "stop_timestamp": None}
+    all_anomaly_timestamps = []
+
+    for entry in intake:
+        sensor_id = entry.get("sensor_id")
+        anomalies = entry.get("anomalies", [])
+
+        # Initialize the list for the sensor if not already present
+        if sensor_id not in grouped:
+            grouped[sensor_id] = []
+
+        # Add anomalies for this sensor
+        grouped[sensor_id].extend(anomalies)
+
+        # Collect timestamps for range calculation
+        for anomaly in anomalies:
+            ts = anomaly.get("timestamp")
+            if ts:
+                all_anomaly_timestamps.append(ts)
+
+    if all_anomaly_timestamps:
+        grouped["timestamp"] = min(all_anomaly_timestamps)
+        grouped["stop_timestamp"] = max(all_anomaly_timestamps)
+
+    return grouped
+
+
 async def summarize():
-    recent = system_event_store.recent_anomalies(INTERVAL_SECONDS)
+    recent = system_event_store.recent_unprocessed_anomalies()
+
     if not recent:
         return
 
-    latest_summary = generate_anomaly_summary(recent)
-    logger.info(latest_summary)
+    to_model = group_anomalies(recent)
+    latest_summary = generate_anomaly_summary(to_model)
 
     window_start = recent[-1]["timestamp"]
     window_end = recent[0]["timestamp"]
@@ -30,6 +60,9 @@ async def summarize():
     anomaly_summary_store.add_summary(
         window_start, window_end, len(recent), latest_summary
     )
+
+    system_event_store.set_process(recent)
+    # logger.info(f"\n{json.dumps(to_model, indent=2)}\n{latest_summary}\n\n")
 
 
 async def main():

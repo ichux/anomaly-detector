@@ -11,8 +11,8 @@ logger = logging.getLogger("runner.py")
 
 ENDPOINT_URL: str = f"{os.getenv('APP_INTERNAL_HOST')}:80"
 ENDPOINT_PATH: str = "/system_event"
-
-SENSOR_ID: str = f"wtf-pipe-{random.randint(1, 10)}"
+STAGES = ["normal", "spike", "drift", "dropout"]
+WEIGHTS = [0.6, 0.12, 0.09, 0.04]
 
 
 def generate_normal_data(sensor_id: str) -> Dict[str, Union[str, float]]:
@@ -49,16 +49,11 @@ def simulate_dropout() -> None:
 
 
 def send_data(data: Dict[str, Union[str, float]]) -> None:
+    logger.info(f"\n{data}\n")
     try:
         conn: http.client.HTTPConnection = http.client.HTTPConnection(ENDPOINT_URL)
         headers: Dict[str, str] = {"Content-Type": "application/json"}
         conn.request("POST", ENDPOINT_PATH, json.dumps(data), headers)
-
-        # response: http.client.HTTPResponse = conn.getresponse()
-        # logger.info(
-        #     f"\nSent: {data}\nResponse: {response.status} {response.read().decode()}\n"
-        # )
-
         conn.close()
     except (http.client.HTTPException, ConnectionError) as exc:
         logger.error(f"Failed to send data: {exc}")
@@ -66,20 +61,21 @@ def send_data(data: Dict[str, Union[str, float]]) -> None:
 
 def main() -> None:
     while True:
-        anomaly_type: str = random.choices(
-            ["normal", "spike", "drift", "dropout"],
-            weights=[0.6, 0.12, 0.09, 0.04],
-            k=1,
-        )[0]
+        # Fixed to match assignment specification
+        # sensor_id: str = "wtf-pipe-1"
+
+        sensor_id: str = f"wtf-pipe-{random.randint(1, 10)}"
+        anomaly_type: str = random.choices(STAGES, weights=WEIGHTS, k=1)[0]
+
         match anomaly_type:
             case "normal":
-                send_data(generate_normal_data(SENSOR_ID))
+                send_data(generate_normal_data(sensor_id))
                 time.sleep(2)
             case "spike":
-                send_data(generate_spike(SENSOR_ID))
+                send_data(generate_spike(sensor_id))
                 time.sleep(2)
             case "drift":
-                send_data(generate_drift(SENSOR_ID))
+                send_data(generate_drift(sensor_id))
                 time.sleep(2)
             case "dropout":
                 simulate_dropout()
@@ -89,5 +85,4 @@ if __name__ == "__main__":
     from logs import setup_logging
 
     setup_logging()
-
     main()

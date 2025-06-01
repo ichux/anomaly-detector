@@ -1,9 +1,12 @@
+import logging
 import os
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Union
 
 import typesense
 from typesense.exceptions import ObjectNotFound
+
+logger = logging.getLogger("database.py")
 
 ts_client = typesense.Client(
     {
@@ -38,7 +41,6 @@ class SystemEventsDBHandler:
     def __init__(self) -> None:
         self.collection_name: str = "system_events"
         self.ts_client = ts_client
-        self.create_collection()
 
     def create_collection(self):
         if not self.get_collection(collection_name=self.collection_name):
@@ -54,6 +56,7 @@ class SystemEventsDBHandler:
                         {"name": "flow", "type": "float"},
                         {"name": "is_anomaly", "type": "bool"},
                         {"name": "anomalies", "type": "object[]"},
+                        {"name": "processed", "type": "bool"},
                     ],
                 }
             )
@@ -79,18 +82,22 @@ class SystemEventsDBHandler:
         iso_ts = event.get("timestamp")
         if iso_ts:
             event["timestamp"] = int_from_iso(iso_ts)
+            event["processed"] = False
             return self.ts_client.collections[self.collection_name].documents.create(
                 event
             )
         return {"message": "No timestamp provided"}
 
+    def set_process(self, events: List[dict]):
+        for event in events:
+            event["timestamp"] = int_from_iso(event.get("timestamp"))
+            event["processed"] = True
+
+            self.ts_client.collections[self.collection_name].documents.upsert(event)
+
     def recent_anomalies(self, duration: int | None) -> List[dict]:
-        cutoff_ms = int(
-            (
-                datetime.now(timezone.utc) - timedelta(seconds=duration or 24 * 60 * 60)
-            ).timestamp()
-            * 1000
-        )
+        timed = datetime.now(timezone.utc) - timedelta(seconds=duration or 24 * 60 * 60)
+        cutoff_ms = int(timed.timestamp() * 1000)
 
         base_search = {
             "q": "*",
@@ -115,6 +122,47 @@ class SystemEventsDBHandler:
             hits = resp.get("hits", [])
             docs = [hit["document"] for hit in hits]
             if not docs:
+
+                break
+
+            # Convert timestamp on each document
+            for doc in docs:
+                if isinstance(doc.get("timestamp"), int):
+                    # pyright: ignore
+                    doc["timestamp"] = iso_from_int(doc["timestamp"])
+
+            all_docs.extend(docs)
+            if len(docs) < base_search["per_page"]:
+                break
+            page += 1
+
+        return all_docs
+
+    def recent_unprocessed_anomalies(self) -> List[dict]:
+        base_search = {
+            "q": "*",
+            "query_by": "anomalies",
+            "filter_by": "is_anomaly:true && processed:false",
+            "sort_by": "timestamp:asc",
+            "per_page": 250,
+        }
+
+        all_docs = []
+        page = 1
+
+        while True:
+            try:
+                # pyright: ignore
+                resp = self.ts_client.collections[
+                    self.collection_name
+                ].documents.search({**base_search, "page": page})
+            except ObjectNotFound:
+                return []
+
+            hits = resp.get("hits", [])
+            docs = [hit["document"] for hit in hits]
+            if not docs:
+
                 break
 
             # Convert timestamp on each document
@@ -135,7 +183,6 @@ class AnomalySummary:
     def __init__(self) -> None:
         self.collection_name = "anomaly_summary"
         self.ts = ts_client
-        self.create_collection()
 
     def create_collection(self):
         if not self.get_collection():
