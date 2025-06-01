@@ -9,7 +9,7 @@ The **Anomaly Detector** is a fully offline, self-hosted AI solution for ingesti
 ### Setup:
 - Requirements:
     - Docker
-    - Internet access (To pull needed images, and AI model - 3.4 GB)
+    - Internet access (To pull needed images, and AI model - 4.0 GB)
 - Start the program:
     - `make e` - create the .env file
     - `make b` - build the container
