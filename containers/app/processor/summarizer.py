@@ -9,22 +9,19 @@ from langchain_ollama.llms import OllamaLLM
 logger = logging.getLogger("summarizer.py")
 
 
-def generate_anomaly_summary(
-    anomaly_data: Dict, model_name: str = "llama3.1:8b-instruct-q3_K_M"
-) -> str:
+def generate_anomaly_summary(anomaly_data: Dict) -> str:
     """
     Generate a detailed human-readable anomaly summary via Ollama.
 
     Args:
         anomaly_data: Dictionary containing anomaly records grouped by sensor_id.
-        model_name: Ollama model identifier (default: llama3.1:8b-instruct-q3_K_M).
 
     Returns:
         A multi-sentence, structured summary describing the anomalies.
     """
     llm = OllamaLLM(
         base_url=os.getenv("OLLAMA_API"),
-        model=model_name,
+        model=os.getenv("OLLAMA_MODEL"),
         temperature=0.1,
     )
 
