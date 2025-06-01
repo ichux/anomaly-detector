@@ -61,7 +61,7 @@ services:
       - .env
 
   if_anomaly_cpu:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.9.0
     restart: always
     pull_policy: always
     container_name: cf_anomaly_cpu

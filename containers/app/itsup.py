@@ -77,7 +77,7 @@ def wait_for_model(url: str, interval: int = 1, timeout: int = 30):
                 try:
                     models = json.loads(data).get("models")
                     if any(m.get("name") == target_name for m in models):
-                        logging.info(f"✅ Model '{target_name}' is available at {url}")
+                        logging.info(f"✅ Model '{target_name}' exists")
                         break
                     else:
                         logging.info(
