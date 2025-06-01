@@ -18,8 +18,7 @@ e:
 .PHONY: b
 # help: b				- build containers with Ollama
 b:
-	@COMPOSE_BAKE=true BUILDKIT_PROGRESS=plain docker compose -f docker-compose.yml \
-	    -f docker-compose-cpu.yml up --build -d
+	@COMPOSE_BAKE=true BUILDKIT_PROGRESS=plain docker compose -f docker-compose.yml up --build -d
 
 .PHONY: fr
 # help: fr				- pip freeze

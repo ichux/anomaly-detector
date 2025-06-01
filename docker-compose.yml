@@ -59,3 +59,17 @@ services:
     command: ./system_events/boot.sh
     env_file:
       - .env
+
+  if_anomaly_cpu:
+    image: ollama/ollama:latest
+    restart: always
+    pull_policy: always
+    container_name: cf_anomaly_cpu
+    entrypoint: ["/entrypoint.sh"]
+    ports:
+      - "11435:11434"
+    volumes:
+      - /opt/.anomaly_models:/root/.ollama
+      - ./containers/ollama/entrypoint.sh:/entrypoint.sh
+    env_file:
+      - .env
