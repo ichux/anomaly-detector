@@ -49,7 +49,7 @@ def simulate_dropout() -> None:
 
 
 def send_data(data: Dict[str, Union[str, float]]) -> None:
-    logger.info(f"\n{data}\n")
+    # logger.info(f"\n{data}\n")
     try:
         conn: http.client.HTTPConnection = http.client.HTTPConnection(ENDPOINT_URL)
         headers: Dict[str, str] = {"Content-Type": "application/json"}
