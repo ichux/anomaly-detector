@@ -1,12 +1,23 @@
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Query
+from processor.anomaly_detector import SystemEventTracker
 from processor.database import AnomalySummary, SystemEventsDBHandler
+from pydantic import BaseModel
 from web.utils import llm_active
 
 router: APIRouter = APIRouter()
 system_event_store: SystemEventsDBHandler = SystemEventsDBHandler()
 anomaly_summary_store: AnomalySummary = AnomalySummary()
+processor: SystemEventTracker = SystemEventTracker()
+
+
+class SystemEvent(BaseModel):
+    timestamp: str
+    sensor_id: str
+    temperature: float
+    pressure: float
+    flow: float
 
 
 @router.get("/anomalies", summary="List recent anomalies")
@@ -40,3 +51,13 @@ def get_status() -> Dict[str, str]:
         "anomaly_store": "active" if system_event_store.get_collection() else "down",
         "llm": "active" if llm_active() else "down",
     }
+
+
+@router.post("/system_event", summary="Receive system event")
+def system_event(event: SystemEvent) -> Any:
+    try:
+        event_dict: Dict[str, Any] = event.model_dump()
+        processed: Dict[str, Any] = processor.process_event(event_dict)
+        return system_event_store.add_event({**event_dict, **processed})
+    except Exception as exc:
+        return {"error": str(exc)}
