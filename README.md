@@ -17,7 +17,7 @@ The **Anomaly Detector** is a fully offline, self-hosted AI solution for ingesti
 ### Key Benefits
 
 * **Privacy & Security:** All processing and storage occur on-premise via Ollama and Typesense.
-* **Speed & Scalability:** Millisecond-level indexing and retrieval with Typesense; sub-second inference using Llama 3.2 via Ollama.
+* **Speed & Scalability:** Millisecond-level indexing and retrieval with Typesense; sub-second inference.
 * **Clarity:** Technical anomalies are transformed into clear narratives, reducing operator cognitive load.
 
 ---
@@ -69,7 +69,7 @@ The system is divided into two coordinated phases—**anomaly extraction** and *
    * Pipeline: Retrieval → Prompt Construction → Model Inference → Post-Processing.
    * Handles prompt templates, errors, and context truncation.
 
-4. **Text Generation (Llama 3.2–3B via Ollama)**
+4. **Text Generation**
 
    * Generates coherent, conversational summaries.
    * Includes timestamps, sensor IDs, and anomaly details.
@@ -210,12 +210,12 @@ The system is divided into two coordinated phases—**anomaly extraction** and *
 
 ## Technology Stack & Justification
 
-| Component                 | Role                        | Rationale                                                              |
-| ------------------------- | --------------------------- | ---------------------------------------------------------------------- |
-| **Ollama**                | Local model execution       | On-prem inference, fast startup, optimized for low-memory environments |
-| **Typesense**             | Vector & structured storage | Real-time indexing, flexible schema, and fast vector-based retrieval   |
-| **Llama 3.2–3B-instruct** | Text generation             | Good balance of quality, speed, and resource efficiency                |
-| **LangChain**             | Orchestration & prompt mgmt | Modular chains, retry logic, and template management                   |
+| Component     | Role                        | Rationale                                                              |
+|---------------| --------------------------- | ---------------------------------------------------------------------- |
+| **Ollama**    | Local model execution       | On-prem inference, fast startup, optimized for low-memory environments |
+| **Typesense** | Vector & structured storage | Real-time indexing, flexible schema, and fast vector-based retrieval   |
+| **model**     | Text generation             | Good balance of quality, speed, and resource efficiency                |
+| **LangChain** | Orchestration & prompt mgmt | Modular chains, retry logic, and template management                   |
 
 ---
 
