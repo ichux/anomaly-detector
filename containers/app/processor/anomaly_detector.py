@@ -18,8 +18,8 @@ class SystemEventTracker:
             curr_time: datetime = datetime.fromisoformat(
                 event["timestamp"].replace("Z", "+00:00")  # type: ignore
             )
-        except Exception as e:
-            logging.error(f"Invalid timestamp {event.get('timestamp')}: {e}")
+        except (Exception,) as exc:
+            logging.error(f"Invalid timestamp {event.get('timestamp')}: {exc}")
             return {"anomalies": [], "is_anomaly": False}
 
         # Dropout detection
