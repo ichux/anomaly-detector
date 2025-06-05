@@ -9,9 +9,9 @@ pid=$!
 # Pause for Ollama to start.
 sleep 5
 
-echo "Retrieving model (llama3.2:3b-instruct-q8_0) - 3.4 GB"
+echo "Retrieving model (llama3.1:8b-instruct-q2_K)"
 
-ollama pull llama3.2:3b-instruct-q8_0
+ollama pull llama3.1:8b-instruct-q2_K
 
 echo "Done."
 
