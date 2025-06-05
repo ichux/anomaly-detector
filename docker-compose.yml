@@ -35,7 +35,6 @@ services:
 
   if_anomaly_detector_web:
     <<: *if_anomaly_detector_manager
-    restart: always
     container_name: cf_anomaly_detector_web
     command: ./boot_web.sh
     ports:
